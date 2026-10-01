@@ -40,7 +40,7 @@ def table(out, cfg):
     rs = out["results"]
     if len(rs) >= 2 and overlap(rs[0], rs[1]):
         lines.append(f"Top two overlap (#1 P90 {rs[0]['cost_p90']:.3f} >= #2 P10 {rs[1]['cost_p10']:.3f}). "
-                     "Configs for both are emitted; A/B them with replay.py before committing.")
+                     "Configs for both are emitted; A/B them with bivie-replay before committing.")
     for i, r in enumerate(rs[:3], 1):
         if len(r["shapes"]) > 1:
             lines.append(f"#{i}: buckets chose different replica shapes ({' | '.join(r['shapes'])}). Cost assumes "
@@ -155,5 +155,4 @@ def write_all(out, cfg, plan, profile_path, outdir):
     json.dump(slim, open(os.path.join(outdir, "results.json"), "w"), indent=1, default=str)
     yaml.safe_dump(assumptions(cfg, plan, out, profile_path), open(os.path.join(outdir, "assumptions.yaml"), "w"),
                    sort_keys=False)
-    shutil.copy(os.path.join(os.path.dirname(__file__), "replay.py"), os.path.join(outdir, "replay.py"))
     return md

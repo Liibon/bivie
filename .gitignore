@@ -3,3 +3,4 @@ __pycache__/
 out/
 tests/fixtures/
 tests/stub_vlm.py
+bin/

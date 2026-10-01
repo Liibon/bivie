@@ -2,6 +2,7 @@
 
   profile PLAN FOLDER [-o out/profile.jsonl] [--sample N]   count work per request
   size    PLAN [-p out/profile.jsonl] [-o out/run]          rank deployments, emit configs
+  export  PLAN [-p out/profile.jsonl] [-o out/requests.jsonl]   request bodies for bivie-replay (Go)
   validate --replay replay.jsonl                            token accounting check
 """
 import argparse
@@ -60,7 +61,15 @@ def cmd_size(a):
         md += "\n## Generated configs\n\n" + "\n".join(f"- {m}" for m in made) + "\n"
         open(os.path.join(a.out, "report.md"), "w").write(md)
     print(md)
-    print(f"wrote {a.out}/report.md, results.json, assumptions.yaml, replay.py")
+    print(f"wrote {a.out}/report.md, results.json, assumptions.yaml")
+
+
+def cmd_export(a):
+    from . import export
+
+    plan = profile.load_plan(a.plan)
+    n = export.run(a.profile, plan["request_plan"], a.model or plan["model"], a.out, a.max_tokens, a.limit)
+    print(f"wrote {n} request bodies to {a.out}")
 
 
 def cmd_validate(a):
@@ -88,6 +97,14 @@ def main():
     s.add_argument("--mode", choices=["batch", "online"])
     s.add_argument("--no-configs", action="store_true")
     s.set_defaults(fn=cmd_size)
+    e = sub.add_parser("export", help="render profiled requests into bodies for bivie-replay")
+    e.add_argument("plan")
+    e.add_argument("-p", "--profile", default="out/profile.jsonl")
+    e.add_argument("-o", "--out", default="out/requests.jsonl")
+    e.add_argument("--model", help="served model name, default the plan's model")
+    e.add_argument("--max-tokens", type=int, default=512)
+    e.add_argument("--limit", type=int, default=0)
+    e.set_defaults(fn=cmd_export)
     v = sub.add_parser("validate", help="check a replay run's token accounting")
     v.add_argument("--replay", required=True)
     v.set_defaults(fn=cmd_validate)

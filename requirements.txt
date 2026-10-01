@@ -1,0 +1,8 @@
+transformers==5.18.0
+aiconfigurator==0.12.0
+torch==2.14.1
+torchvision==0.29.1
+pillow==12.3.0
+pypdfium2==5.13.0
+numpy==2.5.3
+pyyaml==6.0.3
