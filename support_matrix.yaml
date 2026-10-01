@@ -1,0 +1,8 @@
+# Which topologies each media type can deploy on, per pinned serving-stack version.
+# Topology names: agg, pd (prefill/decode split, encoder in prefill), e_agg, e_p_d.
+# Verify against the release notes for each version before trusting an entry.
+dynamo-1.5/vllm:
+  image: [agg, pd, e_agg, e_p_d]
+  video: [agg, pd]          # encode worker handles image_url only; video stays on the P/D path
+vllm-0.11/native-epd:
+  image: [agg, e_agg]        # --ec-transfer-config encoder instances; P/D split not combined here

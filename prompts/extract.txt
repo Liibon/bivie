@@ -1,0 +1,1 @@
+Extract all fields from this document as JSON.

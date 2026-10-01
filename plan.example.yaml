@@ -1,0 +1,29 @@
+model: Qwen/Qwen3-VL-8B-Instruct
+request_plan:
+  pdf:   {dpi: 150, pages_per_request: 4}
+  image: {max_pixels: 1310720}       # caps photos at 1,280 tokens (32x32 px per token)
+  per_request_overrides: true        # server accepts per-request mm_processor_kwargs, so pdf keeps its own cap
+  prompt_template: prompts/extract.txt
+# processor settings must match what the server applies (startup --mm-processor-kwargs or per request)
+
+sizing:
+  aic_model: Qwen/Qwen3-VL-8B-Instruct
+  backend: vllm
+  stack: dynamo-1.5/vllm             # key into support_matrix.yaml
+  main_systems: [h100_sxm, h200_sxm]
+  encoder_systems: [l40s]            # cheaper encode tier; AIConfigurator has no L4 data
+  prices:                            # $/GPU-hour, example on-demand rates, replace with yours
+    h100_sxm: 2.49
+    h200_sxm: 3.49
+    l40s: 0.99
+  cpu_core_price: 0.04               # $/core-hour
+  cpu_speed_factor: 1.0              # profiled cpu_ms x this = target CPU time
+  link_gbps: 100                     # measured encode->prefill / prefill->decode bandwidth
+  output_tokens: 512                 # or {dist: [..]} from a pilot run
+  slo: {ttft_ms: 3000, tpot_ms: 40}
+  mode: batch                        # batch | online
+  batch:  {files: 100000, deadline_hours: 24, slo: {ttft_ms: 120000, tpot_ms: 200}}
+  online: {files_per_s: 2.0}
+  buckets: 4
+  bootstrap: 200
+  model_sigma: 0.10                  # per-bucket rate error until calibrated (AIC vs real vLLM)
